@@ -52,10 +52,18 @@ public class BotEventParser {
             JsonArray messageArray = messageElement.getAsJsonArray();
             StringBuilder messageBuilder = new StringBuilder();
             for (JsonElement element : messageArray) {
-                JsonObject messageObject = element.getAsJsonObject();
-                JsonObject dataObject = messageObject.get("data").getAsJsonObject();
-                String text = dataObject.get("text").getAsString();
-                messageBuilder.append(text);
+                if (element.isJsonObject()) {
+                    JsonObject messageObject = element.getAsJsonObject();
+                    JsonElement dataElement = messageObject.get("data");
+                    if (dataElement != null && dataElement.isJsonObject()) {
+                        JsonObject dataObject = dataElement.getAsJsonObject();
+                        JsonElement textElement = dataObject.get("text");
+                        if (textElement != null && textElement.isJsonPrimitive()) {
+                            String text = textElement.getAsString();
+                            messageBuilder.append(text);
+                        }
+                    }
+                }
             }
             object.addProperty("message", messageBuilder.toString());
         }
